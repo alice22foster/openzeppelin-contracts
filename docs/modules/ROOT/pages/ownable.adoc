@@ -1,0 +1,44 @@
+[[ownership-and-ownable]]
+== Ownership and `Ownable`
+
+The most common and basic form of access control is the concept of _ownership_: there's an account that is the `owner` of a contract and can do administrative tasks on it. This approach is perfectly reasonable for contracts that have a single administrative user.
+
+OpenZeppelin provides xref:api:ownership.adoc#Ownable[`Ownable`] for implementing ownership in your contracts.
+
+[source,solidity]
+----
+pragma solidity ^0.5.0;
+
+import "@openzeppelin/contracts/ownership/Ownable.sol";
+
+contract MyContract is Ownable {
+    function normalThing() public {
+        // anyone can call this normalThing()
+    }
+
+    function specialThing() public onlyOwner {
+        // only the owner can call specialThing()!
+    }
+}
+----
+
+By default, the xref:api:ownership.adoc#Ownable-owner--[`owner`] of an `Ownable` contract is the account that deployed it, which is usually exactly what you want.
+
+Ownable also lets you:
+* xref:api:ownership.adoc#Ownable-transferOwnership-address-[`transferOwnership`] from the owner account to a new one, and
+* xref:api:ownership.adoc#Ownable-renounceOwnership--[`renounceOwnership`] for the owner to relinquish this administrative privilege, a common pattern after an initial stage with centralized administration is over.
+
+WARNING: Removing the owner altogether will mean that administrative tasks that are protected by `onlyOwner` will no longer be callable!
+
+Note that *a contract can also be the owner of another one*! This opens the door to using, for example, a https://github.com/gnosis/MultiSigWallet[Gnosis Multisig] or https://safe.gnosis.io[Gnosis Safe], an https://aragon.org[Aragon DAO], an https://www.uport.me[ERC725/uPort] identity contract, or a totally custom contract that _you_ create.
+
+In this way you can use _composability_ to add additional layers of access control complexity to your contracts. Instead of having a single regular Ethereum account (Externally Owned Account, or EOA) as the owner, you could use a 2-of-3 multisig run by your project leads, for example. Prominent projects in the space, such as https://makerdao.com[MakerDAO], use systems similar to this one.
+
+[[role-based-access-control]]
+== Role-Based Access Control
+
+While the simplicity of _ownership_ can be useful for simple systems or quick prototyping, different levels of authorization are often needed. An account may be able to ban users from a system, but not create new tokens. _Role-Based Access Control (RBAC)_ offers flexibility in this regard.
+
+In essence, we will be defining multiple _roles_, each allowed to perform different sets of actions. Instead of `onlyOwner` everywhere - you will use, for example, `onlyAdminRole` in some places, and `onlyModeratorRole` in others. Separately, you will be able to define rules for how accounts can be assignned a role, transfer it, and more.
+
+Most of software development uses access control systems that are role-based: some users are regular users, some may be supervisors or managers, and a few will often have administrative privileges.
