@@ -20,25 +20,26 @@ pragma solidity ^0.6.0;
 library EnumerableSet {
 
     struct AddressSet {
-        // Position of the value in the `values` array, plus 1 because index 0
-        // means a value is not in the set.
-        mapping (address => uint256) index;
-        address[] values;
+        address[] keys;
+        // Position of the key in the `keys` array, plus 1 because index 0
+        // means a key is not in the set.
+        mapping (address => uint256) indexes;
     }
 
     /**
-     * @dev Add a value to a set. O(1).
-     * Returns false if the value was already in the set.
+     * @dev Add a key to a set. O(1).
+     *
+     * Returns false if the key was already in the set.
      */
-    function add(AddressSet storage set, address value)
+    function add(AddressSet storage set, address key)
         internal
         returns (bool)
     {
-        if (!contains(set, value)) {
-            set.values.push(value);
-            // The element is stored at length-1, but we add 1 to all indexes
+        if (!contains(set, key)) {
+            set.keys.push(key);
+            // The key is stored at length-1, but we add 1 to all indexes
             // and use 0 as a sentinel value
-            set.index[value] = set.values.length;
+            set.indexes[key] = set.keys.length;
             return true;
         } else {
             return false;
@@ -46,32 +47,33 @@ library EnumerableSet {
     }
 
     /**
-     * @dev Removes a value from a set. O(1).
-     * Returns false if the value was not present in the set.
+     * @dev Removes a key from a set. O(1).
+     *
+     * Returns false if the key was not present in the set.
      */
-    function remove(AddressSet storage set, address value)
+    function remove(AddressSet storage set, address key)
         internal
         returns (bool)
     {
-        if (contains(set, value)){
-            uint256 toDeleteIndex = set.index[value] - 1;
-            uint256 lastIndex = set.values.length - 1;
+        if (contains(set, key)){
+            uint256 toDeleteIndex = set.indexes[key] - 1;
+            uint256 lastIndex = set.keys.length - 1;
 
-            // If the element we're deleting is the last one, we can just remove it without doing a swap
+            // If the key we're deleting is the last one, we can just remove it without doing a swap
             if (lastIndex != toDeleteIndex) {
-                address lastValue = set.values[lastIndex];
+                address lastKey = set.keys[lastIndex];
 
-                // Move the last value to the index where the deleted value is
-                set.values[toDeleteIndex] = lastValue;
-                // Update the index for the moved value
-                set.index[lastValue] = toDeleteIndex + 1; // All indexes are 1-based
+                // Move the last key to the index where the deleted key is
+                set.keys[toDeleteIndex] = lastKey;
+                // Update the index for the moved key
+                set.indexes[lastKey] = toDeleteIndex + 1; // All indexes are 1-based
             }
 
-            // Delete the index entry for the deleted value
-            delete set.index[value];
+            // Delete the slot where the moved key was stored
+            set.keys.pop();
 
-            // Delete the old entry for the moved value
-            set.values.pop();
+            // Delete the index for the deleted slot
+            delete set.indexes[key];
 
             return true;
         } else {
@@ -80,20 +82,21 @@ library EnumerableSet {
     }
 
     /**
-     * @dev Returns true if the value is in the set. O(1).
+     * @dev Returns true if the key is in the set. O(1).
      */
-    function contains(AddressSet storage set, address value)
+    function contains(AddressSet storage set, address key)
         internal
         view
         returns (bool)
     {
-        return set.index[value] != 0;
+        return set.indexes[key] != 0;
     }
 
     /**
-     * @dev Returns an array with all values in the set. O(N).
-     * Note that there are no guarantees on the ordering of values inside the
-     * array, and it may change when more values are added or removed.
+     * @dev Returns an array with all keys in the set. O(N).
+     *
+     * Note that there are no guarantees on the ordering of keys inside the
+     * array, and it may change when more keys are added or removed.
 
      * WARNING: This function may run out of gas on large sets: use {length} and
      * {get} instead in these cases.
@@ -103,27 +106,29 @@ library EnumerableSet {
         view
         returns (address[] memory)
     {
-        address[] memory output = new address[](set.values.length);
-        for (uint256 i; i < set.values.length; i++){
-            output[i] = set.values[i];
+        address[] memory output = new address[](set.keys.length);
+        for (uint256 i; i < set.keys.length; i++){
+            output[i] = set.keys[i];
         }
         return output;
     }
 
     /**
-     * @dev Returns the number of elements on the set. O(1).
+     * @dev Returns the number of keys on the set. O(1).
      */
     function length(AddressSet storage set)
         internal
         view
         returns (uint256)
     {
-        return set.values.length;
+        return set.keys.length;
     }
 
-   /** @dev Returns the element stored at position `index` in the set. O(1).
-    * Note that there are no guarantees on the ordering of values inside the
-    * array, and it may change when more values are added or removed.
+   /**
+    * @dev Returns the key stored at position `index` in the set. O(1).
+    *
+    * Note that there are no guarantees on the ordering of keys inside the
+    * array, and it may change when more keys are added or removed.
     *
     * Requirements:
     *
@@ -134,6 +139,129 @@ library EnumerableSet {
         view
         returns (address)
     {
-        return set.values[index];
+        return set.keys[index];
+    }
+
+    struct Uint256Set {
+        uint256[] keys;
+        // Position of the key in the `keys` array, plus 1 because index 0
+        // means a key is not in the set.
+        mapping (uint256 => uint256) indexes;
+    }
+
+    /**
+     * @dev Add a key to a set. O(1).
+     *
+     * Returns false if the key was already in the set.
+     */
+    function add(Uint256Set storage set, uint256 key)
+        internal
+        returns (bool)
+    {
+        if (!contains(set, key)) {
+            set.keys.push(key);
+            // The key is stored at length-1, but we add 1 to all indexes
+            // and use 0 as a sentinel value
+            set.indexes[key] = set.keys.length;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @dev Removes a key from a set. O(1).
+     *
+     * Returns false if the key was not present in the set.
+     */
+    function remove(Uint256Set storage set, uint256 key)
+        internal
+        returns (bool)
+    {
+        if (contains(set, key)){
+            uint256 toDeleteIndex = set.indexes[key] - 1;
+            uint256 lastIndex = set.keys.length - 1;
+
+            // If the key we're deleting is the last one, we can just remove it without doing a swap
+            if (lastIndex != toDeleteIndex) {
+                uint256 lastKey = set.keys[lastIndex];
+
+                // Move the last key to the index where the deleted key is
+                set.keys[toDeleteIndex] = lastKey;
+                // Update the index for the moved key
+                set.indexes[lastKey] = toDeleteIndex + 1; // All indexes are 1-based
+            }
+
+            // Delete the slot where the moved key was stored
+            set.keys.pop();
+
+            // Delete the index for the deleted slot
+            delete set.indexes[key];
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @dev Returns true if the key is in the set. O(1).
+     */
+    function contains(Uint256Set storage set, uint256 key)
+        internal
+        view
+        returns (bool)
+    {
+        return set.indexes[key] != 0;
+    }
+
+    /**
+     * @dev Returns an array with all keys in the set. O(N).
+     *
+     * Note that there are no guarantees on the ordering of keys inside the
+     * array, and it may change when more keys are added or removed.
+
+     * WARNING: This function may run out of gas on large sets: use {length} and
+     * {get} instead in these cases.
+     */
+    function enumerate(Uint256Set storage set)
+        internal
+        view
+        returns (uint256[] memory)
+    {
+        uint256[] memory output = new uint256[](set.keys.length);
+        for (uint256 i; i < set.keys.length; i++){
+            output[i] = set.keys[i];
+        }
+        return output;
+    }
+
+    /**
+     * @dev Returns the number of keys on the set. O(1).
+     */
+    function length(Uint256Set storage set)
+        internal
+        view
+        returns (uint256)
+    {
+        return set.keys.length;
+    }
+
+   /**
+    * @dev Returns the key stored at position `index` in the set. O(1).
+    *
+    * Note that there are no guarantees on the ordering of keys inside the
+    * array, and it may change when more keys are added or removed.
+    *
+    * Requirements:
+    *
+    * - `index` must be strictly less than {length}.
+    */
+    function get(Uint256Set storage set, uint256 index)
+        internal
+        view
+        returns (uint256)
+    {
+        return set.keys[index];
     }
 }

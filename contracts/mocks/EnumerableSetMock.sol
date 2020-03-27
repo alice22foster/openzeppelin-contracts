@@ -9,17 +9,17 @@ contract EnumerableSetMock{
 
     EnumerableSet.AddressSet private set;
 
-    function contains(address value) public view returns (bool) {
-        return set.contains(value);
+    function contains(address key) public view returns (bool) {
+        return set.contains(key);
     }
 
-    function add(address value) public {
-        bool result = set.add(value);
+    function add(address key) public {
+        bool result = set.add(key);
         emit TransactionResult(result);
     }
 
-    function remove(address value) public {
-        bool result = set.remove(value);
+    function remove(address key) public {
+        bool result = set.remove(key);
         emit TransactionResult(result);
     }
 

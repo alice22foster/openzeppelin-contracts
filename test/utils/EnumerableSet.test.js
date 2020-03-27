@@ -11,18 +11,18 @@ describe('EnumerableSet', function () {
     this.set = await EnumerableSetMock.new();
   });
 
-  async function expectMembersMatch (set, members) {
-    await Promise.all(members.map(async account =>
+  async function expectMembersMatch (set, keys) {
+    await Promise.all(keys.map(async account =>
       expect(await set.contains(account)).to.equal(true)
     ));
 
-    expect(await set.enumerate()).to.have.same.members(members);
+    expect(await set.enumerate()).to.have.same.members(keys);
 
-    expect(await set.length()).to.bignumber.equal(members.length.toString());
+    expect(await set.length()).to.bignumber.equal(keys.length.toString());
 
-    expect(await Promise.all([...Array(members.length).keys()].map(index =>
+    expect(await Promise.all([...Array(keys.length).keys()].map(index =>
       set.get(index)
-    ))).to.have.same.members(members);
+    ))).to.have.same.members(keys);
   }
 
   it('starts empty', async function () {
@@ -31,14 +31,14 @@ describe('EnumerableSet', function () {
     await expectMembersMatch(this.set, []);
   });
 
-  it('adds a value', async function () {
+  it('adds a key', async function () {
     const receipt = await this.set.add(accountA);
     expectEvent(receipt, 'TransactionResult', { result: true });
 
     await expectMembersMatch(this.set, [accountA]);
   });
 
-  it('adds several values', async function () {
+  it('adds several keys', async function () {
     await this.set.add(accountA);
     await this.set.add(accountB);
 
@@ -46,7 +46,7 @@ describe('EnumerableSet', function () {
     expect(await this.set.contains(accountC)).to.equal(false);
   });
 
-  it('returns false when adding elements already in the set', async function () {
+  it('returns false when adding keys already in the set', async function () {
     await this.set.add(accountA);
 
     const receipt = (await this.set.add(accountA));
@@ -55,7 +55,7 @@ describe('EnumerableSet', function () {
     await expectMembersMatch(this.set, [accountA]);
   });
 
-  it('removes added values', async function () {
+  it('removes added keys', async function () {
     await this.set.add(accountA);
 
     const receipt = await this.set.remove(accountA);
@@ -65,14 +65,14 @@ describe('EnumerableSet', function () {
     await expectMembersMatch(this.set, []);
   });
 
-  it('returns false when removing elements not in the set', async function () {
+  it('returns false when removing keys not in the set', async function () {
     const receipt = await this.set.remove(accountA);
     expectEvent(receipt, 'TransactionResult', { result: false });
 
     expect(await this.set.contains(accountA)).to.equal(false);
   });
 
-  it('adds and removes multiple values', async function () {
+  it('adds and removes multiple keys', async function () {
     // []
 
     await this.set.add(accountA);
