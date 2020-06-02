@@ -45,13 +45,7 @@ contract ERC1155 is ERC165, IERC1155
     }
 
     /**
-        @dev Get the specified address' balance for token with specified ID.
-
-        Attempting to query the zero account for a balance will result in a revert.
-
-        @param account The address of the token holder
-        @param id ID of the token
-        @return The account's balance of the token type requested
+     * @dev See {IERC1155-balanceOf}.
      */
     function balanceOf(address account, uint256 id) public view override returns (uint256) {
         require(account != address(0), "ERC1155: balance query for the zero address");
@@ -59,13 +53,7 @@ contract ERC1155 is ERC165, IERC1155
     }
 
     /**
-        @dev Get the balance of multiple account/token pairs.
-
-        If any of the query accounts is the zero account, this query will revert.
-
-        @param accounts The addresses of the token holders
-        @param ids IDs of the tokens
-        @return Balances for each account and token id pair
+     * @dev See {IERC1155-balanceOfBatch}.
      */
     function balanceOfBatch(
         address[] memory accounts,
@@ -89,15 +77,7 @@ contract ERC1155 is ERC165, IERC1155
     }
 
     /**
-     * @dev Sets or unsets the approval of a given operator.
-     *
-     * An operator is allowed to transfer all tokens of the sender on their behalf.
-     *
-     * Because an account already has operator privileges for itself, this function will revert
-     * if the account attempts to set the approval status for itself.
-     *
-     * @param operator address to set the approval
-     * @param approved representing the status of the approval to be set
+     * @dev See {IERC1155-setApprovalForAll}.
      */
     function setApprovalForAll(address operator, bool approved) external override virtual {
         require(msg.sender != operator, "ERC1155: cannot set approval status for self");
@@ -106,25 +86,15 @@ contract ERC1155 is ERC165, IERC1155
     }
 
     /**
-        @notice Queries the approval status of an operator for a given account.
-        @param account   The account of the Tokens
-        @param operator  Address of authorized operator
-        @return           True if the operator is approved, false if not
-    */
+     * @dev See {IERC1155-isApprovedForAll}.
+     */
     function isApprovedForAll(address account, address operator) public view override returns (bool) {
         return _operatorApprovals[account][operator];
     }
 
     /**
-        @dev Transfers `value` amount of an `id` from the `from` address to the `to` address specified.
-        Caller must be approved to manage the tokens being transferred out of the `from` account.
-        If `to` is a smart contract, will call `onERC1155Received` on `to` and act appropriately.
-        @param from Source address
-        @param to Target address
-        @param id ID of the token type
-        @param value Transfer amount
-        @param data Data forwarded to `onERC1155Received` if `to` is a contract receiver
-    */
+     * @dev See {IERC1155-safeTransferFrom}.
+     */
     function safeTransferFrom(
         address from,
         address to,
@@ -151,16 +121,8 @@ contract ERC1155 is ERC165, IERC1155
     }
 
     /**
-        @dev Transfers `values` amount(s) of `ids` from the `from` address to the
-        `to` address specified. Caller must be approved to manage the tokens being
-        transferred out of the `from` account. If `to` is a smart contract, will
-        call `onERC1155BatchReceived` on `to` and act appropriately.
-        @param from Source address
-        @param to Target address
-        @param ids IDs of each token type
-        @param values Transfer amounts per token type
-        @param data Data forwarded to `onERC1155Received` if `to` is a contract receiver
-    */
+     * @dev See {IERC1155-safeBatchTransferFrom}.
+     */
     function safeBatchTransferFrom(
         address from,
         address to,
@@ -196,19 +158,17 @@ contract ERC1155 is ERC165, IERC1155
     }
 
     /**
-     * @dev Internal function to mint an amount of a token with the given ID
-     * @param to The address that will own the minted token
-     * @param id ID of the token to be minted
-     * @param value Amount of the token to be minted
-     * @param data Data forwarded to `onERC1155Received` if `to` is a contract receiver
+     * @dev Creates `value` tokens of token type `id`, and assigns them to `account`.
+     *
+     * Emits a {TransferSingle} event.
      */
-    function _mint(address to, uint256 id, uint256 value, bytes memory data) internal virtual {
-        require(to != address(0), "ERC1155: mint to the zero address");
+    function _mint(address account, uint256 id, uint256 value, bytes memory data) internal virtual {
+        require(account != address(0), "ERC1155: mint to the zero address");
 
-        _balances[id][to] = _balances[id][to].add(value);
-        emit TransferSingle(msg.sender, address(0), to, id, value);
+        _balances[id][account] = _balances[id][account].add(value);
+        emit TransferSingle(msg.sender, address(0), account, id, value);
 
-        _doSafeTransferAcceptanceCheck(msg.sender, address(0), to, id, value, data);
+        _doSafeTransferAcceptanceCheck(msg.sender, address(0), account, id, value, data);
     }
 
     /**
